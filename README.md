@@ -4,24 +4,6 @@
 
 ---
 
-## ✨ Tính năng đã hoàn thiện
-
-1. **Đồ họa Pixel Art Top-Down 3/4 RPG (`64 PPU`):**
-   - Tường gỗ và sàn gỗ vát cạnh (`Bevel` + `1px Rim Highlight`), lò sưởi đá khắc khối, ghế sofa và nhân vật Chibi RPG kèm bóng đổ mềm bán trong suốt (`Soft Drop Shadow`).
-   - Hệ thống ánh sáng **URP 2D** gồm `Global Light 2D` và `Point Light 2D` tỏa ánh sáng cam ấm áp từ lò sưởi.
-2. **Hiệu ứng chiều sâu 2.5D khi ngồi ghế (`Sorting Order Layering`):**
-   - Chiếc ghế Sofa được tách thành 2 lớp Sprite (`Sofa_Back` ở `Order = 2` và `Sofa_FrontArm` ở `Order = 4`), giúp nhân vật (`Order = 3`) ngồi lọt vào trong lòng ghế tự nhiên.
-3. **Điều khiển nhân vật & Tương tác (`New Input System`):**
-   - Đi bộ ngang mượt mà, tự động lật hướng nhìn (`flipX`) và kiểm tra khoảng cách tương tác với ghế Sofa (`SofaInteractable`).
-4. **Camera bám theo nhân vật mượt mà (`CameraFollow2D`):**
-   - Sử dụng `Vector3.SmoothDamp` trong `LateUpdate()` giúp triệt tiêu hiện tượng giật khung hình (*Jitter*).
-   - Tích hợp khóa biên căn phòng (`Room Bounds Clamping`) để camera không bao giờ nhìn lọt ra khoảng đen bên ngoài tường.
-5. **Giao diện Cuốn Sách Nhật Ký (`BookMenuUI` - Diegetic UI):**
-   - Khi nhân vật ngồi xuống ghế, cuốn sách dày mở bìa xuất hiện với hiệu ứng mờ dần & phóng nhẹ (`Fade & Scale Pop-in`).
-   - Nửa bên trái là mặt bìa trong bọc da mạ đồng (`EX LIBRIS - EDWIND`), nửa bên phải là mặt giấy ngà chứa các nút **CHƠI TIẾP**, **CHƠI MỚI**, **GẤP SÁCH**.
-
----
-
 ## 🎮 Hướng dẫn điều khiển (Controls)
 
 | Phím / Thao tác | Chức năng |
@@ -59,18 +41,6 @@ Edwind/
 ├── HUONG_DAN_TAO_BOOK_MENU_UI.md      # Tài liệu chuyên sâu về cách dựng UI Cuốn Sách
 └── README.md                          # Thông tin tổng quan dự án
 ```
-
----
-
-## 📚 Tài liệu học tập đi kèm trong dự án
-
-Dự án có sẵn 2 tài liệu hướng dẫn chi tiết bằng tiếng Việt để bạn vừa thực hành vừa tra cứu:
-1. 📘 **[HUONG_DAN_LO_TRINH_HOC_2D.md](file:///d:/Unity/project/Edwind/HUONG_DAN_LO_TRINH_HOC_2D.md):**
-   - Giải thích tư duy phối cảnh 2.5D Oblique và Top-Down 3/4 RPG.
-   - Kỹ thuật tách lớp Sprite (`Layer Sandwich`), chuẩn hóa `64 PPU`, `Point Filter`, `Orthographic Camera`.
-   - Giải thích code C# di chuyển, tương tác, `CameraFollow2D`, cùng hướng dẫn nâng cấp lên di chuyển 4 hướng (`W/A/S/D`) và `Y-Sorting` tự động.
-2. 📙 **[HUONG_DAN_TAO_BOOK_MENU_UI.md](file:///d:/Unity/project/Edwind/HUONG_DAN_TAO_BOOK_MENU_UI.md):**
-   - Phân tích cấu trúc thị giác cuốn sách mở bìa, kiến trúc `Canvas`, `CanvasScaler`, `CanvasGroup`, `InputSystemUIInputModule` và hiệu ứng chuyển động UI.
 
 ---
 
