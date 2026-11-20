@@ -644,6 +644,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1200000003}
   - component: {fileID: 1200000002}
+  - component: {fileID: 1200000004}
+  - component: {fileID: 1200000005}
   m_Layer: 0
   m_Name: Fireplace
   m_TagString: Untagged
@@ -726,6 +728,50 @@ Transform:
   - {fileID: 1200000012}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1200000004
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200000001}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 33333333cbffa6845834b9d38f5bc002, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1200000005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22222222cbffa6845834b9d38f5bc005, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flameFrames:
+  - {fileID: 2130000100000000800, guid: 11111111cbffa6845834b9d38f5bc008, type: 3}
+  - {fileID: 2130000100000000801, guid: 11111111cbffa6845834b9d38f5bc008, type: 3}
+  - {fileID: 2130000100000000802, guid: 11111111cbffa6845834b9d38f5bc008, type: 3}
+  - {fileID: 2130000100000000803, guid: 11111111cbffa6845834b9d38f5bc008, type: 3}
+  framesPerSecond: 8
+  fireplaceLight: {fileID: 1200000011}
+  baseIntensity: 1.35
+  flickerIntensityRange: 0.22
+  flickerSpeed: 6.5
 --- !u!1 &1200000010
 GameObject:
   m_ObjectHideFlags: 0
@@ -779,8 +825,8 @@ MonoBehaviour:
   m_ShadowVolumeIntensityEnabled: 0
   m_ShadowVolumeIntensity: 0.75
   m_LocalBounds:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 4.5, y: 4.5, z: 0}
+    m_Center: {x: 0, y: -0.00000011920929, z: 0}
+    m_Extent: {x: 0.9985302, y: 0.99853027, z: 0}
   m_PointLightInnerAngle: 360
   m_PointLightOuterAngle: 360
   m_PointLightInnerRadius: 0.4
@@ -1079,6 +1125,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1400000003}
   - component: {fileID: 1400000002}
+  - component: {fileID: 1400000005}
   - component: {fileID: 1400000004}
   m_Layer: 0
   m_Name: Player
@@ -1176,10 +1223,44 @@ MonoBehaviour:
   moveSpeed: 3.5
   minX: -7.5
   maxX: 7.5
-  standingSprite: {fileID: 2130000100000000005, guid: 11111111cbffa6845834b9d38f5bc005, type: 3}
+  minY: -2.6
+  maxY: -1
+  standingSprite: {fileID: 2130000100000000900, guid: 11111111cbffa6845834b9d38f5bc009, type: 3}
   sittingSprite: {fileID: 2130000100000000006, guid: 11111111cbffa6845834b9d38f5bc006, type: 3}
+  walkFrames:
+  - {fileID: 2130000100000000901, guid: 11111111cbffa6845834b9d38f5bc009, type: 3}
+  - {fileID: 2130000100000000902, guid: 11111111cbffa6845834b9d38f5bc009, type: 3}
+  - {fileID: 2130000100000000903, guid: 11111111cbffa6845834b9d38f5bc009, type: 3}
+  - {fileID: 2130000100000000904, guid: 11111111cbffa6845834b9d38f5bc009, type: 3}
+  idleFrames:
+  - {fileID: 2130000100000000900, guid: 11111111cbffa6845834b9d38f5bc009, type: 3}
+  - {fileID: 2130000100000000905, guid: 11111111cbffa6845834b9d38f5bc009, type: 3}
+  walkFrameRate: 8
+  idleFrameRate: 2
   targetSofa: {fileID: 1300000003}
   bookMenu: {fileID: 1500000003}
+--- !u!95 &1400000005
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000001}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 33333333cbffa6845834b9d38f5bc006, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1500000001
 GameObject:
   m_ObjectHideFlags: 0

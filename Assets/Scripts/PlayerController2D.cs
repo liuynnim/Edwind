@@ -2,12 +2,15 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Điều khiển nhân vật 2D đi ngang (Trái/Phải) trên sàn nhà, tương tác ngồi vào ghế Sofa
-/// và mở giao diện Cuốn Sách Menu (BookMenuUI).
+/// Điều khiển nhân vật 2D đi ngang (Trái/Phải) trên sàn nhà, chạy hoạt ảnh Walk Cycle / Idle qua Animator,
+/// tương tác ngồi vào ghế Sofa và mở giao diện Cuốn Sách Menu (BookMenuUI).
 /// </summary>
 [RequireComponent(typeof(SpriteRenderer))]
 public class PlayerController2D : MonoBehaviour
 {
+    private static readonly int IsWalkingHash = Animator.StringToHash("IsWalking");
+    private static readonly int IsSittingHash = Animator.StringToHash("IsSitting");
+
     [Header("Di chuyển (Movement)")]
     [Tooltip("Tốc độ đi bộ ngang trên sàn nhà (đơn vị Unity / giây).")]
     public float moveSpeed = 3.5f;
@@ -16,12 +19,28 @@ public class PlayerController2D : MonoBehaviour
     public float minX = -7.5f;
     public float maxX = 7.5f;
 
-    [Header("Hình ảnh nhân vật (Sprites)")]
-    [Tooltip("Sprite khi nhân vật đứng hoặc đi lại trên sàn.")]
+    [Tooltip("Giới hạn di chuyển lên và xuống theo trục Y.")]
+    public float minY = -2.6f;
+    public float maxY = -1f;
+
+    [Header("Hình ảnh & Hoạt ảnh (Sprites & Walk Cycle)")]
+    [Tooltip("Sprite mặc định khi nhân vật đứng yên.")]
     public Sprite standingSprite;
 
     [Tooltip("Sprite khi nhân vật ngồi trên ghế Sofa.")]
     public Sprite sittingSprite;
+
+    [Tooltip("Chuỗi 4 frame bước chân (player_walk_sheet_1 .. 4).")]
+    public Sprite[] walkFrames;
+
+    [Tooltip("Chuỗi 2 frame thở nhẹ khi đứng yên (player_walk_sheet_0 & 5).")]
+    public Sprite[] idleFrames;
+
+    [Tooltip("Tốc độ chuyển frame khi đi bộ (số frame / giây).")]
+    public float walkFrameRate = 8f;
+
+    [Tooltip("Tốc độ chuyển frame khi đứng thở nhẹ (số frame / giây).")]
+    public float idleFrameRate = 2f;
 
     [Header("Tương tác ghế Sofa & Cuốn Sách Menu")]
     [Tooltip("Tham chiếu đến chiếc ghế Sofa trong phòng.")]
@@ -31,7 +50,11 @@ public class PlayerController2D : MonoBehaviour
     public BookMenuUI bookMenu;
 
     private SpriteRenderer spriteRenderer;
+    private Animator animator;
     private bool isSitting;
+    private bool isWalking;
+    private float animTimer;
+    private int currentFrameIndex;
     private Vector3 initialSpawnPosition;
     private Vector3 standingReturnPosition;
     private GUIStyle promptStyle;
@@ -39,6 +62,7 @@ public class PlayerController2D : MonoBehaviour
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
         initialSpawnPosition = transform.position;
 
         if (standingSprite != null)
@@ -63,6 +87,7 @@ public class PlayerController2D : MonoBehaviour
         // Nếu cuốn sách đang mở trên màn hình -> nhường quyền điều khiển cho giao diện sách
         if (bookMenu != null && bookMenu.IsBookOpen)
         {
+            SetMovementAnimationState(false);
             return;
         }
 
@@ -79,9 +104,21 @@ public class PlayerController2D : MonoBehaviour
             moveInput += 1f;
         }
 
+        // Đọc phím di chuyển dọc (W/S hoặc Mũi tên Lên/Xuống)
+        float verticalInput = 0f;
+        if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
+        {
+            verticalInput += 1f;
+        }
+        if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
+        {
+            verticalInput -= 1f;
+        }
+
         // Nếu đang ngồi trên ghế (và đã đóng sách bằng nút "Chơi Tiếp")
         if (isSitting)
         {
+            SetMovementAnimationState(false);
             if (interactPressed)
             {
                 StandUp();
@@ -96,16 +133,74 @@ public class PlayerController2D : MonoBehaviour
             return;
         }
 
-        // Di chuyển ngang Trái/Phải trên sàn
-        if (Mathf.Abs(moveInput) > 0.01f)
+        // Di chuyển trong giới hạn X/Y
+        bool movingNow = Mathf.Abs(moveInput) > 0.01f || Mathf.Abs(verticalInput) > 0.01f;
+        if (movingNow)
         {
             Vector3 pos = transform.position;
             pos.x = Mathf.Clamp(pos.x + moveInput * moveSpeed * Time.deltaTime, minX, maxX);
+            pos.y = Mathf.Clamp(pos.y + verticalInput * moveSpeed * Time.deltaTime, minY, maxY);
             transform.position = pos;
 
             // Lật hướng mặt nhân vật: mặc định Sprite nhìn sang phải (flipX = false),
             // khi đi sang trái thì đặt flipX = true.
-            spriteRenderer.flipX = moveInput < 0f;
+            if (Mathf.Abs(moveInput) > 0.01f)
+            {
+                spriteRenderer.flipX = moveInput < 0f;
+            }
+        }
+
+        SetMovementAnimationState(movingNow);
+        UpdateFallbackSpriteAnimation();
+    }
+
+    /// <summary>
+    /// Cập nhật biến Bool trên Animator ("IsWalking" và "IsSitting").
+    /// </summary>
+    private void SetMovementAnimationState(bool walking)
+    {
+        if (isWalking != walking)
+        {
+            isWalking = walking;
+            animTimer = 0f;
+            currentFrameIndex = 0;
+        }
+
+        if (animator != null && animator.runtimeAnimatorController != null)
+        {
+            animator.SetBool(IsWalkingHash, isWalking);
+            animator.SetBool(IsSittingHash, isSitting);
+        }
+    }
+
+    /// <summary>
+    /// Đảm bảo hoạt ảnh bước chân / đứng yên vẫn chạy mượt ngay cả khi Animator chưa bật.
+    /// </summary>
+    private void UpdateFallbackSpriteAnimation()
+    {
+        if (animator != null && animator.enabled && animator.runtimeAnimatorController != null)
+        {
+            return;
+        }
+
+        Sprite[] activeFrames = isWalking ? walkFrames : idleFrames;
+        float fps = isWalking ? walkFrameRate : idleFrameRate;
+
+        if (activeFrames == null || activeFrames.Length == 0)
+        {
+            return;
+        }
+
+        animTimer += Time.deltaTime;
+        float interval = 1f / Mathf.Max(1f, fps);
+        if (animTimer >= interval)
+        {
+            animTimer -= interval;
+            currentFrameIndex = (currentFrameIndex + 1) % activeFrames.Length;
+            if (activeFrames[currentFrameIndex] != null)
+            {
+                spriteRenderer.sprite = activeFrames[currentFrameIndex];
+            }
         }
     }
 
@@ -117,6 +212,7 @@ public class PlayerController2D : MonoBehaviour
     {
         isSitting = true;
         standingReturnPosition = transform.position;
+        SetMovementAnimationState(false);
 
         // Dịch chuyển nhân vật vào đúng điểm neo trên đệm ghế
         transform.position = targetSofa.GetSitPosition();
@@ -141,6 +237,8 @@ public class PlayerController2D : MonoBehaviour
     private void StandUp()
     {
         isSitting = false;
+        SetMovementAnimationState(false);
+
         if (bookMenu != null)
         {
             bookMenu.CloseBook();
@@ -173,6 +271,7 @@ public class PlayerController2D : MonoBehaviour
     public void StartNewGameFromBook()
     {
         isSitting = false;
+        SetMovementAnimationState(false);
         transform.position = initialSpawnPosition;
 
         if (standingSprite != null)
